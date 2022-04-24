@@ -23,6 +23,8 @@ contract SmartWalletChecker {
         onlyManager
     {
         isManager[_manager] = _status;
+
+        emit SetManager(_manager, _status);
     }
 
     /**
@@ -38,24 +40,16 @@ contract SmartWalletChecker {
         onlyManager
     {
         isAllowed[_contract] = _status;
-    }
 
-    /**
-     * @notice returns true is _address is whitelisted
-     * @param _address The address to check
-     */
-    function check (
-        address _address
-    )
-        external
-        view
-        returns(bool)
-    {
-        return isAllowed[_address];
+        emit SetAllowedManager(_contract, _status);
     }
 
     modifier onlyManager() {
         require(isManager[msg.sender], "!manager");
         _;
     }
+
+    /* ========== EVENTS ========== */
+    event SetManager(address manager, bool status);
+    event SetAllowedManager(address contractAddr, bool status);
 }

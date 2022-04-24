@@ -11,7 +11,7 @@ import "./VeTokenStorage.sol";
 // # Interface for checking whether address belongs to a whitelisted
 // # type of a smart wallet.
 interface SmartWalletChecker {
-    function check(address addr) external returns (bool);
+    function isAllowed(address addr) external returns (bool);
 }
 
 contract VeToken is AccessControl, VeTokenStorage {
@@ -37,6 +37,8 @@ contract VeToken is AccessControl, VeTokenStorage {
         startBlk = startBlk_;
 
         poolInfo.lastUpdateBlk = startBlk > block.number ? startBlk : block.number;
+    
+        emit Initialize(tokenAddr_, name_, symbol_, version_, scorePerBlk_, startBlk_);
     }
 
     /* ========== VIEWS & INTERNALS ========== */
@@ -199,7 +201,7 @@ contract VeToken is AccessControl, VeTokenStorage {
         if (addr_ != tx.origin) {
             address checker = smartWalletChecker;
             if (checker != ZERO_ADDRESS){
-                if (SmartWalletChecker(checker).check(addr_)){
+                if (SmartWalletChecker(checker).isAllowed(addr_)){
                     return;
                 }
             }
@@ -284,12 +286,14 @@ contract VeToken is AccessControl, VeTokenStorage {
 
     /* ========== RESTRICTED FUNCTIONS ========== */
 
-    function _become(
+    function become(
         VeTokenProxy veTokenProxy
     ) public 
     {
         require(msg.sender == veTokenProxy.owner(), "only MultiSigner can change brains");
-        veTokenProxy._acceptImplementation();
+        veTokenProxy.acceptImplementation();
+
+        emit Become(address(veTokenProxy), address(this));
     }
 
     /**
@@ -339,9 +343,12 @@ contract VeToken is AccessControl, VeTokenStorage {
 
     function claim (address receiver) external onlyOwner nonReentrant {
         payable(receiver).transfer(address(this).balance);
+    
+        emit Claim(receiver);
     }
     
     /* ========== EVENTS ========== */
+    event Initialize(address tokenAddr, string name, string symbol, string version, uint scorePerBlk, uint startBlk);
     event DepositFor(address depositor, uint256 value);
     event Withdraw(uint256 value);
     event ApplySmartWalletChecker(address smartWalletChecker);
@@ -349,4 +356,6 @@ contract VeToken is AccessControl, VeTokenStorage {
     event UpdateStakingPool(uint256 blockNumber);
     event SetScorePerBlk(uint256 scorePerBlk);
     event SetClearBlk(uint256 clearBlk);
+    event Become(address proxy, address impl);
+    event Claim(address receiver);
 }

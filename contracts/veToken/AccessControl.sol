@@ -15,6 +15,7 @@ contract AccessControl is Ownable, ReentrancyGuard {
     event AdminTransferred(address oldAdmin, address newAdmin);
     event FlipStakableState(bool stakeIsActive);
     event FlipClaimableState(bool claimIsActive);
+    event TransferAdmin(address oldAdmin, address newAdmin);
 
     address private _admin;
     address public proxy;
@@ -90,7 +91,10 @@ contract AccessControl is Ownable, ReentrancyGuard {
      */
     function transferAdmin(address newAdmin) external virtual onlyOwner {
         require(newAdmin != address(0), "Invalid Admin: new admin is the zero address");
+        address oldAdmin = admin();
         _setAdmin(newAdmin);
+
+        emit TransferAdmin(oldAdmin, newAdmin);
     }
 
     /*

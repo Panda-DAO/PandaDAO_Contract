@@ -21,7 +21,7 @@ contract VeTokenStorage is  ProxyStorage {
     string public name;
     string public symbol;
     string public version;
-    uint256 public decimals = 18;
+    uint256 constant decimals = 18;
 
     // score related
     uint256 public scorePerBlk;

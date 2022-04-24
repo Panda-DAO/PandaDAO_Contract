@@ -9,7 +9,7 @@ import "./AccessControl.sol";
  * @dev Storage for the VeToken is at this address, while execution is delegated to the `veTokenImplementation`.
  */
 contract VeTokenProxy is AccessControl, ProxyStorage {
-    function _setPendingImplementation(
+    function setPendingImplementation(
         address newPendingImplementation_
     ) public onlyOwner 
     {
@@ -24,7 +24,7 @@ contract VeTokenProxy is AccessControl, ProxyStorage {
     * @notice Accepts new implementation of comptroller. msg.sender must be pendingImplementation
     * @dev Admin function for new implementation to accept it's role as implementation
     */
-    function _acceptImplementation() public {
+    function acceptImplementation() public {
         // Check caller is pendingImplementation and pendingImplementation ≠ address(0)
         require (msg.sender == pendingVeTokenImplementation && pendingVeTokenImplementation != address(0),
                 "Invalid veTokenImplementation");
@@ -64,6 +64,8 @@ contract VeTokenProxy is AccessControl, ProxyStorage {
 
     function claim (address receiver) external onlyOwner nonReentrant {
         payable(receiver).transfer(address(this).balance);
+
+        emit Claim(receiver);
     }
 
     /**
@@ -75,5 +77,10 @@ contract VeTokenProxy is AccessControl, ProxyStorage {
       * @notice Emitted when pendingComptrollerImplementation is accepted, which means comptroller implementation is updated
       */
     event NewImplementation(address oldImplementation, address newImplementation);
+   
+    /**
+      * @notice Emitted when claim eth in contract
+      */
+    event Claim(address receiver);
 }
  
