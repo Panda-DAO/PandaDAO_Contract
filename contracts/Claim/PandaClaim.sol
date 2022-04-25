@@ -32,8 +32,8 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 contract PandaClaim is Ownable, ReentrancyGuard {
     using SafeERC20 for IERC20;
 
-    // bytes32 public merkleRoot;
-    address public pandaToken;
+    
+    address public immutable pandaToken;
     address public usdToken;
     mapping(address => uint256) public claimRecord;
     mapping(address => uint256) public pandaClaimSum;
@@ -41,7 +41,7 @@ contract PandaClaim is Ownable, ReentrancyGuard {
     mapping(address => uint256) public etherClaimSum;
     uint256 public claimCycle;
     bool public claimOpen;
-
+    // bytes32 public merkleRoot;
     bytes32 public merkleRoot;
 
     address public constant ZERO_ADDRESS = address(0);
@@ -93,7 +93,9 @@ contract PandaClaim is Ownable, ReentrancyGuard {
 
     /**
      * @dev Claims  tokens.
-     * @param amount The amount of the claim being made.
+     * @param amount The amount of panda.
+     * @param etherAmount The amount of ether.
+     * @param usdAmount The amount of usd.
      * @param merkleProof A merkle proof proving the claim is valid.
      */
     function claimPandaTokens(uint256 amount, uint256 etherAmount, uint256 usdAmount, bytes32[] calldata merkleProof) external nonReentrant {
@@ -155,8 +157,8 @@ contract PandaClaim is Ownable, ReentrancyGuard {
     }
 
     /**
-     * @dev Sets the merkle root. Only callable if the root is not yet set.
-     * @param _token tokens claim merkle tree.
+     * @dev set Usd Token Address
+     * @param _token token address
      */
     function setUsdToken(address _token) external onlyOwner notZeroAddr(_token) {
         require(usdToken != _token, "PE4");
